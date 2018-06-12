@@ -1,0 +1,6 @@
+
+	const char clr[] = { 27, '[', '2', 'J', '\0' };
+	const char topLeft[] = { 27, '[', '1', ';', '1', 'H', '\0' };
+
+		/* Clear screen and move to top left */
+	printf("%s%s", clr, topLeft);
