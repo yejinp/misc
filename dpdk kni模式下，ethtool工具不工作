@@ -1,0 +1,7 @@
+最近在使用dpdk（版本：17.11.2）的kni模式时发现，使用kni模式时，无法使用ethtool获取虚拟网卡的驱动等信息，提示如下：
+no data available
+
+后经排查发现，这个版本中，kni是否支持ethtool通过宏开关控制，文件config/common_base中的宏：CONFIG_RTE_KNI_KMOD_ETHTOOL
+其值默认为n
+
+将这个改为y后编译即可支持。
