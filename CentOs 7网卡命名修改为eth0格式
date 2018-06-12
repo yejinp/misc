@@ -1,0 +1,27 @@
+
+最近在工作中遇到将 CentOs 7的网卡命名修改为eth0格式，
+在网上找到了一些解决方法，大体如下：
+1、编辑 grub 配置文件
+
+vim /etc/sysconfig/grub   # 其实是/etc/default/grub的软连接
+# 为GRUB_CMDLINE_LINUX变量增加2个参数，具体内容如下(加粗)：
+GRUB_CMDLINE_LINUX="crashkernel=auto rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 biosdevname=0 rhgb quiet"
+2、重新生成 grub 配置文件
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+然后重新启动 Linux 操作系统，通过 ip addr 可以看到网卡名称已经变为 eth0 。
+
+3、修改网卡配置文件
+
+原来网卡配置文件名称为 ifcfg-ens33，这里需要修改为 ethx 的格式，并适当调整网卡配置文件。
+
+mv /etc/sysconfig/network-scripts/ifcfg-ens33 /etc/sysconfig/network-scripts/ifcfg-eth0
+# 修改ifcfg-eth0文件如下内容(其它内容不变)
+NAME=eth0
+DEVICE=eth0
+[root@localhost ~]# systemctl restart network.service    # 重启网络服务
+
+但这个方法在自己的机器上就是没有生效，后来排查发现，有的系统中/etc/sysconfig/grub是指向/etc/default/grub的软连接，有的系统中他们是两个单独的文件；当他们是单独的文件时，更应该修改的文件是/etc/default/grub。
+因为上面的第2步中，grub2-mkconfig 会去读取这个文件。
+
+其实，第一步和第二步可以合并起来，也就是直接修改文件/boot/grub2/grub.cfg； 当然，这会引起各文件之间内容一致性问题，因此不建议使用。
